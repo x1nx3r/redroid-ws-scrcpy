@@ -203,7 +203,8 @@ The `command` section of the redroid service sets the Android display. Edit
 | `androidboot.redroid_height` | Display height in pixels | 1280 |
 | `androidboot.redroid_dpi` | Display density | 320 |
 | `androidboot.redroid_fps` | Frame rate | 30 |
-| `androidboot.redroid_gpu_mode` | `guest` = software, `host` = GPU | guest |
+| `androidboot.redroid_gpu_mode` | `guest` = software, `host` = GPU | host |
+| `androidboot.redroid_gpu_node` | Render node for `host` mode | /dev/dri/renderD128 |
 | `androidboot.use_memfd` | Use `memfd` instead of `ashmem` | 1 |
 
 For GPU acceleration, set `androidboot.redroid_gpu_mode=host`. This needs a
@@ -321,8 +322,11 @@ The build needs CA certificates for HTTPS. The Dockerfile installs
 
 ## Notes and limits
 
-* This repo uses software rendering (`gpu_mode=guest`). It is slow, but it
-  runs on most hosts.
+* This repo uses host GPU rendering (`gpu_mode=host`) through mesa. It needs a
+  render node such as `/dev/dri/renderD128`. If the GPU path fails, set
+  `gpu_mode=guest` to fall back to software rendering. Inside the container,
+  `dumpsys SurfaceFlinger` must show a real GPU, for example
+  `AMD Radeon Graphics (radeonsi)`, not ANGLE.
 * ws-scrcpy uses an old scrcpy server (v1.19). Newer devices may work better
   with other clients.
 * Fallback viewer on the host: `scrcpy -s localhost:5555`.
