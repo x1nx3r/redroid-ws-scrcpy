@@ -1,20 +1,32 @@
+x-redroid-command: &redroid-command
+  - androidboot.redroid_width=720
+  - androidboot.redroid_height=1280
+  - androidboot.redroid_dpi=320
+  - androidboot.redroid_fps=30
+  - androidboot.use_memfd=1
+  - androidboot.redroid_gpu_mode=guest
+
 services:
-  redroid:
+  redroid1:
     image: redroid/redroid:12.0.0_64only-latest
     privileged: true
     ports:
       - "5555:5555"
     volumes:
       - ./data:/data
-    command:
-      - androidboot.redroid_width=720
-      - androidboot.redroid_height=1280
-      - androidboot.redroid_dpi=320
-      - androidboot.redroid_fps=30
-      - androidboot.use_memfd=1
-      - androidboot.redroid_gpu_mode=guest
+    command: *redroid-command
     # DO NOT use "unless-stopped": a boot-time start panics the kernel
     # while the Rust binder driver is in use. See README.
+    restart: "no"
+
+  redroid2:
+    image: redroid/redroid:12.0.0_64only-latest
+    privileged: true
+    ports:
+      - "5556:5555"
+    volumes:
+      - ./data2:/data
+    command: *redroid-command
     restart: "no"
 
   ws-scrcpy:
@@ -23,8 +35,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - REDROID_HOST=redroid
-      - REDROID_ADB_PORT=5555
+      - REDROID_HOSTS=redroid1:5555 redroid2:5555
     depends_on:
-      - redroid
+      - redroid1
+      - redroid2
     restart: "no"
